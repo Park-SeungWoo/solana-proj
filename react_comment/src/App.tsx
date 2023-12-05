@@ -2,9 +2,9 @@ import {useRef} from 'react';
 import {
   getPayer,
   establishConnection,
-  helloWorldDApi,
   commentDApi,
-} from './dApi/utils';
+  getCommentData,
+} from '@dApi/utils';
 
 const App = () => {
   const inputRef: React.RefObject<HTMLInputElement> =
@@ -13,18 +13,21 @@ const App = () => {
   const testUtils = async () => {
     const conn = establishConnection();
     const payer = getPayer();
-    // await helloWorldDApi({connection: conn, payer: payer});
     await commentDApi({
       connection: conn,
       payer: payer,
       text: inputRef.current!.value,
     });
+    inputRef.current!.value = '';
     console.log('send transaction');
+
+    // const data = await getCommentData({connection: conn, payer: payer});
+    // console.log(data);
   };
 
   return (
     <>
-      <h1>Solana Comment Ex</h1>
+      <h1>Solana Comment Example</h1>
       <hr />
       <p>add comments</p>
       <input ref={inputRef} />
@@ -32,5 +35,4 @@ const App = () => {
     </>
   );
 };
-
 export default App;

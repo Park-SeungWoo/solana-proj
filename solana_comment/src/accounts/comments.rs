@@ -1,6 +1,9 @@
-use borsh_derive::{BorshDeserialize, BorshSerialize};
+use std::array;
 
-#[derive(BorshDeserialize, BorshSerialize, Debug)]
+use borsh_derive::{BorshDeserialize, BorshSerialize};
+use solana_program::pubkey::Pubkey;
+
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct CommentAccount {
-    pub comments: u8
+    pub comments: String
 }

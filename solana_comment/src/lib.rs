@@ -1,12 +1,12 @@
 #![allow(unused)]  // disable unsed warnings in this crate
 
-use borsh::BorshDeserialize;
+use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
-    account_info::AccountInfo,
+    account_info::{AccountInfo, next_account_info},
     entrypoint,
     entrypoint::ProgramResult,
     pubkey::Pubkey,
-    msg
+    msg, program_error::ProgramError
 };
 pub mod accounts;
 pub mod instruction;
@@ -14,7 +14,6 @@ use accounts::comments::CommentAccount;
 use instruction::comment_instruction;
 
 use crate::instruction::comment_instruction::CommentInstruction;
-
 
 entrypoint!(program_instruction);
 
@@ -24,13 +23,29 @@ pub fn program_instruction(
     instruction_data: &[u8],  // get string data from client
 ) -> ProgramResult {
     msg!("Hi comment program!");
-    let instruction = CommentInstruction::unpack(instruction_data).unwrap();
+
+    let instruction = CommentInstruction::unpack(instruction_data)?;
+
+    let account_iter = &mut accounts.iter();
+    let account = next_account_info(account_iter)?;
+
+    if account.owner != program_id {
+        return Err(ProgramError::InvalidAccountOwner);
+    }
+
+    let mut comment_account = CommentAccount::try_from_slice(&account.data.borrow())?;
+
+    msg!("{:?}", comment_account);
 
     match instruction {
         CommentInstruction::Add(data) => {
+            comment_account.comments.push_str(format!("/{}", data).as_str());
             msg!("{}", data);
         }
     }
+
+    // comment_account.serialize(&mut &mut account.data.borrow_mut()[..])?;  // apply data modification  // String is not a best idea -> change the structure to save comment datas.
+    // msg!("{:?}", account.data.borrow_mut());
 
     Ok(())
 }
@@ -49,4 +64,5 @@ pub fn program_instruction(
 
 /* Q2
     How to store those all comment datas?
+    maybe save those as u8 array, and concat with / char or something
 */
