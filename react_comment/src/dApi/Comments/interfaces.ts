@@ -1,4 +1,4 @@
-import {Connection, Keypair} from '@solana/web3.js';
+import { Connection, Keypair } from '@solana/web3.js';
 
 export interface IDApi {
   connection: Connection;

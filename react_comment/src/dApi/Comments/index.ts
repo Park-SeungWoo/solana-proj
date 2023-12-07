@@ -7,12 +7,12 @@ import {
 } from '@solana/web3.js';
 import * as borsh from 'borsh';
 
-import {IDApi, ICommentDApi} from '@dApi/Comments/interfaces';
-import {CommentAccount, CommentSchema, CommentSize, getCommentProgramId} from './accounts';
+import { IDApi, ICommentDApi } from '@dApi/Comments/interfaces';
+import { CommentAccount, CommentSchema, CommentSize, getCommentProgramId } from './accounts';
 
 const env = process.env;
 
-export const getCommentAccount = async ({connection, payer}: IDApi) => {
+export const getCommentAccount = async ({ connection, payer }: IDApi) => {
   const SEED = env.REACT_APP_COMMENT_ACCOUNT_SEED!;
   const commentPubKey = await PublicKey.createWithSeed(
     payer.publicKey,
@@ -24,9 +24,7 @@ export const getCommentAccount = async ({connection, payer}: IDApi) => {
 
   if (commentAccount == null) {
     // if not exist, create one
-    const lamport = await connection.getMinimumBalanceForRentExemption(
-      CommentSize,
-    ); // must set with account size
+    const lamport = await connection.getMinimumBalanceForRentExemption(CommentSize); // must set with account size
 
     const tx = new Transaction().add(
       SystemProgram.createAccountWithSeed({
@@ -46,29 +44,21 @@ export const getCommentAccount = async ({connection, payer}: IDApi) => {
   return commentPubKey;
 };
 
-export const getCommentData = async ({connection, payer}: IDApi) => {
+export const getCommentData = async ({ connection, payer }: IDApi) => {
   const accountInfo = await connection.getAccountInfo(
-    await getCommentAccount({connection: connection, payer: payer}),
+    await getCommentAccount({ connection: connection, payer: payer }),
   );
 
   if (accountInfo === null) return 'Comment Account not exists';
 
-  const commentData = borsh.deserialize(
-    CommentSchema,
-    CommentAccount,
-    accountInfo.data,
-  );
+  const commentData = borsh.deserialize(CommentSchema, CommentAccount, accountInfo.data);
 
   console.log(commentData);
 
   return commentData.comments;
 };
 
-export const sendCommentToSolanaNet = async ({
-  connection,
-  payer,
-  text,
-}: ICommentDApi) => {
+export const sendCommentToSolanaNet = async ({ connection, payer, text }: ICommentDApi) => {
   const instructionFir = Buffer.from(Uint8Array.from([1])); // instruction 0
   const instructionText = Buffer.from(new TextEncoder().encode(text));
 
